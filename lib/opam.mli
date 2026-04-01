@@ -3,8 +3,7 @@ open! Import
 val create :
   Runner.t -> Switch_name.t -> description:string -> (unit, error) result
 
-val find_ox_version :
-  Runner.t -> Switch_name.t -> (string option, error) result
+val find_ox_version : Runner.t -> Switch_name.t -> (string option, error) result
 
 val repo_add :
   Runner.t ->

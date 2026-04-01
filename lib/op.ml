@@ -14,8 +14,7 @@ let oxcaml_repo_url = "https://github.com/oxcaml/opam-repository.git"
 let setup_oxcaml_repo runner switch_name =
   let open Let_syntax.Result in
   let* () =
-    Opam.repo_add runner switch_name ~repo_name:"oxcaml"
-      ~url:oxcaml_repo_url
+    Opam.repo_add runner switch_name ~repo_name:"oxcaml" ~url:oxcaml_repo_url
   in
   Opam.find_ox_version runner switch_name
 

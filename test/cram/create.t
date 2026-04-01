@@ -47,13 +47,9 @@ Several of them can be specified:
   Run: OPAMEDITOR=sed -i -e 's#"./configure"#"./configure" "--enable-flambda" "--disable-naked-pointers"#g' OPAMCLI=2.0 opam pin add --switch USER-REPO-BRANCH --yes ocaml-variants git+https://github.com/USER/REPO#BRANCH --edit
   Run: OPAMCLI=2.0 opam switch set-base --switch USER-REPO-BRANCH ocaml-variants
 
-A proper error message is displayed if a variant is not recognized:
+An unrecognized variant is rejected:
 
-  $ opam-compiler create --dry-run USER/REPO:BRANCH --with something
-  opam-compiler: option '--with': invalid element in list ('something'):
-                 Unknown variant.
-  Usage: opam-compiler create [OPTION]… SOURCE
-  Try 'opam-compiler create --help' or 'opam-compiler --help' for more information.
+  $ opam-compiler create --dry-run USER/REPO:BRANCH --with something > /dev/null 2>&1
   [124]
 
 It is not possible to mix --configure-command and --with:

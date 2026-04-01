@@ -130,8 +130,8 @@ module Create = struct
       `I ("Github pull request", "user/repo#number");
       `I
         ( "Github pull request (short form)",
-          "#number or user#number (defaults to \"ocaml/ocaml\"; \"oxcaml\" \
-           for oxcaml)" );
+          "#number or user#number (defaults to \"ocaml/ocaml\"; \"oxcaml\" for \
+           oxcaml)" );
       `I ("Github url", "https://github.com/user/repo/pull/1");
     ]
 
