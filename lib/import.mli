@@ -1,4 +1,5 @@
 val re_group_get_opt : Re.Group.t -> int -> string option
+val default_repo_for_user : string -> string
 
 module Let_syntax : sig
   module Cmdliner : sig

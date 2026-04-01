@@ -126,11 +126,12 @@ module Create = struct
       `I ("Github branch", "user/repo:branch");
       `I
         ( "Github branch (short form)",
-          "user:branch (repo defaults to \"ocaml\")" );
+          "user:branch (repo defaults to \"ocaml\"; \"oxcaml\" for oxcaml)" );
       `I ("Github pull request", "user/repo#number");
       `I
         ( "Github pull request (short form)",
-          "#number (repo defaults to \"ocaml/ocaml\")" );
+          "#number or user#number (defaults to \"ocaml/ocaml\"; \"oxcaml\" \
+           for oxcaml)" );
       `I ("Github url", "https://github.com/user/repo/pull/1");
     ]
 

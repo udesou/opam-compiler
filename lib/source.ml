@@ -66,7 +66,9 @@ let parse_as_branch s =
   let open Let_syntax.Option in
   let+ g = Re.exec_opt re_branch s in
   let user = Re.Group.get g 1 in
-  let repo = re_group_get_opt g 2 |> Option.value ~default:"ocaml" in
+  let repo =
+    re_group_get_opt g 2 |> Option.value ~default:(default_repo_for_user user)
+  in
   let branch = Re.Group.get g 3 in
   Github_branch { user; repo; branch }
 
@@ -119,5 +121,10 @@ let switch_target source github_client =
       let open Let_syntax.Result in
       let+ { source_branch; _ } = Github_client.pr_info github_client pr in
       Branch.git_url source_branch
+
+let is_oxcaml = function
+  | Github_branch { repo = "oxcaml"; _ } | Github_PR { repo = "oxcaml"; _ } ->
+      true
+  | _ -> false
 
 let equal (x : t) y = x = y

@@ -4,5 +4,6 @@ val switch_target : t -> Github_client.t -> (string, [> `Unknown ]) result
 val switch_description : t -> Github_client.t -> string
 val global_switch_name : t -> Switch_name.t
 val pp : Format.formatter -> t -> unit
+val is_oxcaml : t -> bool
 val equal : t -> t -> bool
 val parse : string -> (t, [ `Unknown ]) result

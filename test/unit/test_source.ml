@@ -26,6 +26,16 @@ let parse_tests =
       (Ok (Github_PR { user = "user"; repo = "repo"; number = 1234 }));
     test "defaults to main repo" "#1234"
       (Ok (Github_PR { user = "ocaml"; repo = "ocaml"; number = 1234 }));
+    test "oxcaml repo defaults to oxcaml" "oxcaml:branch"
+      (Ok
+         (Github_branch
+            { user = "oxcaml"; repo = "oxcaml"; branch = "branch" }));
+    test "oxcaml PR short form" "oxcaml#1234"
+      (Ok (Github_PR { user = "oxcaml"; repo = "oxcaml"; number = 1234 }));
+    test "oxcaml full form still works" "oxcaml/oxcaml:branch"
+      (Ok
+         (Github_branch
+            { user = "oxcaml"; repo = "oxcaml"; branch = "branch" }));
     test "something that does not parse" "a-random-string" (Error `Unknown);
     test "users can have dashes" "user-with-dashes/repo#1234"
       (Ok

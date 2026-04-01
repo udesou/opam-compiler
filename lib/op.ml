@@ -9,6 +9,16 @@ let try_ r ~if_command_failed =
       e
   | Error _ as e -> e
 
+let oxcaml_repo_url = "https://github.com/oxcaml/opam-repository.git"
+
+let setup_oxcaml_repo runner switch_name =
+  let open Let_syntax.Result in
+  let* () =
+    Opam.repo_add runner switch_name ~repo_name:"oxcaml"
+      ~url:oxcaml_repo_url
+  in
+  Opam.find_ox_version runner switch_name
+
 let create runner github_client source switch_name ~configure_command =
   let switch_name =
     match switch_name with
@@ -18,9 +28,13 @@ let create runner github_client source switch_name ~configure_command =
   let description = Source.switch_description source github_client in
   let open Let_syntax.Result in
   (let* () = Opam.create runner switch_name ~description in
+   let* version =
+     if Source.is_oxcaml source then setup_oxcaml_repo runner switch_name
+     else Ok None
+   in
    let* url = Source.switch_target source github_client in
    let* () =
-     try_ (Opam.pin_add runner switch_name url ~configure_command)
+     try_ (Opam.pin_add runner switch_name url ~configure_command ~version)
        ~if_command_failed:(fun () -> Opam.remove_switch runner switch_name)
    in
    Opam.set_base runner switch_name)
