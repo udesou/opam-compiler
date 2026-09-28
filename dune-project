@@ -23,6 +23,7 @@
  (depends
   (ocaml
    (>= 4.08.0))
+  astring
   bos
   (cmdliner
    (>= 1.1.0))
@@ -33,13 +34,17 @@
   (curly
    (>= 0.2.0))
   (either :with-test)
+  fpath
   github-data
   (ocaml-version
    (>= 3.0.0))
+  (opam-format
+   (>= 2.5.0))
   (re (>= 1.5.0))
   (rresult
    (>= 0.6.0))
   uri
+  yojson
   (alcotest
    (and
     (>= 1.2.0)

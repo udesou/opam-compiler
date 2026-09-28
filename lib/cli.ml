@@ -133,6 +133,14 @@ module Create = struct
           "#number or user#number (defaults to \"ocaml/ocaml\"; \"oxcaml\" for \
            oxcaml)" );
       `I ("Github url", "https://github.com/user/repo/pull/1");
+      `P
+        "A source in a repository named $(b,oxcaml) is built with an \
+         $(b,oxcaml-compiler) recipe from oxcaml/opam-repository: among the \
+         recipes installing the source's VERSION and bootstrapping the build \
+         tools its oxcaml-dev.opam requires, the one whose release commit is \
+         nearest in history. The switch description records the recipe and the \
+         opam-repository commit. Set $(b,GITHUB_TOKEN) to avoid GitHub's rate \
+         limit on unauthenticated API calls.";
     ]
 
   let term =

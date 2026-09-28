@@ -1,3 +1,4 @@
 (library
  (name opam_compiler)
- (libraries bos cmdliner curly github-data ocaml-version re uri))
+ (libraries astring bos cmdliner curly fpath github-data ocaml-version
+   opam-format re rresult uri yojson))

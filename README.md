@@ -7,6 +7,7 @@ It can be used to create switches from various sources such as the main
 repository, ocaml-multicore, or a local directories. It can use tag names,
 branch names, or PR numbers to specify what to install.
 
+<!-- TODO(docs): opam-compiler no longer has a reinstall subcommand (removed in 7f0d8f6, "Remove reinstall command"); this paragraph should drop the two reinstall modes. -->
 Once installed, these are normal opam switches, and one can install packages in
 them. To iterate on a compiler feature and try opam packages at the same time,
 it supports to ways to reinstall the compiler: either a safe and slow technique
@@ -57,3 +58,23 @@ which will create a vanilla compiler. It is possible to override this:
 
     # Build the native compiler with flambda and frame pointers
     opam compiler create '#1234' --configure-command "./configure --enable-flambda --enable-frame-pointers"
+
+OxCaml
+------
+
+Sources in a repository named `oxcaml` build
+[OxCaml](https://github.com/oxcaml/oxcaml):
+
+    # Use the main branch
+    opam compiler create 'oxcaml:main'
+
+    # Use this pull request
+    opam compiler create 'oxcaml#1234'
+
+OxCaml has no compiler opam file in its source tree, so the build recipe comes
+from [oxcaml/opam-repository](https://github.com/oxcaml/opam-repository): the
+`oxcaml-compiler` release nearest in history to the source among those that can
+build it. The switch description records which one was used.
+`--configure-command` and `--with` are not supported. Set `GITHUB_TOKEN` to
+avoid GitHub's API rate limit (since creating an OxCaml switch requires
+additional API calls to find the recipe).

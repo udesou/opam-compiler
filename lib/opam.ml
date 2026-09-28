@@ -21,84 +21,51 @@ let run_out_opam runner args =
   let cmd, extra_env = opam_cmd args in
   Runner.run_out ?extra_env runner cmd
 
-let ocaml_variants ?version () =
-  match version with
-  | None -> A "ocaml-variants"
-  | Some v -> A (Printf.sprintf "ocaml-variants.%s" v)
+let ocaml_variants = "ocaml-variants"
 
-let create runner name ~description =
+let create ?(repositories = []) runner name ~description =
+  let repositories =
+    match repositories with
+    | [] -> []
+    | repos -> [ A ("--repositories=" ^ String.concat "," repos) ]
+  in
   run_opam runner
-    [
-      A "switch";
-      A "create";
-      A (Switch_name.to_string name);
-      A "--empty";
-      A "--description";
-      A description;
-    ]
+    ([
+       A "switch";
+       A "create";
+       A (Switch_name.to_string name);
+       A "--empty";
+       A "--description";
+       A description;
+     ]
+    @ repositories)
 
 let switch name = L [ A "--switch"; A (Switch_name.to_string name) ]
 
-let find_ox_version runner name =
-  let open Let_syntax.Result in
-  let+ output =
-    run_out_opam runner
-      [
-        A "list";
-        switch name;
-        A "--columns=version";
-        A "--short";
-        A "ocaml-variants";
-      ]
+let configure_editor configure_command =
+  let opam_quote s = Printf.sprintf {|"%s"|} s in
+  let configure_in_opam_format =
+    configure_command |> Bos.Cmd.to_list |> List.map opam_quote
+    |> String.concat " "
   in
-  let versions = String.split_on_char '\n' output in
-  List.find_opt (fun v -> Astring.String.is_suffix ~affix:"+ox" v) versions
+  Printf.sprintf {|sed -i -e 's#"./configure"#%s#g'|} configure_in_opam_format
 
-let repo_add runner name ~repo_name ~url =
-  run_opam runner
-    [
-      A "repo";
-      A "add";
-      A repo_name;
-      A url;
-      A "--on-switch";
-      A (Switch_name.to_string name);
-    ]
-
-let pin_add runner name url ~configure_command ~version =
+let pin_add runner name url ~package ~editor =
   let cmd_base =
-    [
-      A "pin";
-      A "add";
-      switch name;
-      A "--yes";
-      ocaml_variants ?version ();
-      A url;
-    ]
+    [ A "pin"; A "add"; switch name; A "--yes"; A package; A url ]
   in
   let cmd_rest =
-    match configure_command with
+    match editor with
     | None -> []
-    | Some configure_command ->
-        let opam_quote s = Printf.sprintf {|"%s"|} s in
-        let configure_in_opam_format =
-          configure_command |> Bos.Cmd.to_list |> List.map opam_quote
-          |> String.concat " "
-        in
-        let sed_command =
-          Printf.sprintf {|sed -i -e 's#"./configure"#%s#g'|}
-            configure_in_opam_format
-        in
-        [ A "--edit"; Set_env ("OPAMEDITOR", sed_command) ]
+    | Some editor -> [ A "--edit"; Set_env ("OPAMEDITOR", editor) ]
   in
-  let cmd = cmd_base @ cmd_rest in
-  run_opam runner cmd
+  run_opam runner (cmd_base @ cmd_rest)
 
-let set_base runner name =
-  run_opam runner [ A "switch"; A "set-base"; switch name; ocaml_variants () ]
+let set_base runner name ~package =
+  run_opam runner [ A "switch"; A "set-base"; switch name; A package ]
 
 let update runner name =
-  run_opam runner [ A "update"; switch name; ocaml_variants () ]
+  run_opam runner [ A "update"; switch name; A ocaml_variants ]
 
 let reinstall_configure runner ~configure_command =
   let open Let_syntax.Result in
@@ -119,7 +86,7 @@ let reinstall_compiler runner ~configure_command =
 
 let reinstall_packages runner =
   run_opam runner
-    [ A "reinstall"; A "--assume-built"; A "--working-dir"; ocaml_variants () ]
+    [ A "reinstall"; A "--assume-built"; A "--working-dir"; A ocaml_variants ]
 
 let remove_switch runner name =
   run_opam runner

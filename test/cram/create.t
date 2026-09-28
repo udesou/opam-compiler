@@ -57,3 +57,19 @@ It is not possible to mix --configure-command and --with:
   $ opam-compiler create --dry-run USER/REPO:BRANCH --configure-command "./configure --enable-x" --with afl
   opam-compiler: --configure-command and --with cannot be passed together.
   [124]
+
+A source in a repository named oxcaml is built with an oxcaml-compiler recipe
+borrowed from oxcaml/opam-repository:
+
+  $ TMPDIR=. opam-compiler create --dry-run oxcaml:main
+  Run: OPAMCLI=2.0 opam switch create oxcaml-oxcaml-main --empty --description "[opam-compiler] oxcaml/oxcaml:main at 0401b35d00b0, built with oxcaml-compiler.DRY-RUN from oxcaml/opam-repository@a56316deae95" --repositories=oxcaml-a56316deae95=git+https://github.com/oxcaml/opam-repository.git#a56316deae95dcf4260cdf7df975002aa56316de,default
+  Run: OPAMEDITOR=cp './opam-compiler-oxcaml-oxcaml-main.opam' OPAMCLI=2.0 opam pin add --switch oxcaml-oxcaml-main --yes oxcaml-compiler.DRY-RUN git+https://github.com/oxcaml/oxcaml#main --edit
+  Run: OPAMCLI=2.0 opam switch set-base --switch oxcaml-oxcaml-main oxcaml-compiler
+
+OxCaml recipes have their own configure step, so it cannot be replaced:
+
+  $ opam-compiler create --dry-run oxcaml:main --with afl
+  opam-compiler: internal error, uncaught exception:
+                 Failure("--configure-command and --with are not supported for OxCaml sources: the build recipe comes from oxcaml/opam-repository.")
+                 
+  [125]

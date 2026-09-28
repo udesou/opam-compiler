@@ -66,7 +66,7 @@ let switch_target_tests =
         let pr_info, check =
           Mock.create (module Pull_request) __LOC__ expectations
         in
-        let github_client = { Github_client.pr_info } in
+        let github_client = { Helpers.github_client_fail_all with pr_info } in
         let got = Source.switch_target source github_client in
         Alcotest.check Alcotest.(result string error) __LOC__ expected got;
         check () )
@@ -106,7 +106,7 @@ let switch_description_tests =
         let pr_info, check =
           Mock.create (module Pull_request) __LOC__ github_expectations
         in
-        let github_client = { Github_client.pr_info } in
+        let github_client = { Helpers.github_client_fail_all with pr_info } in
         let got = Source.switch_description source github_client in
         Alcotest.check Alcotest.(string) __LOC__ expected got;
         check () )

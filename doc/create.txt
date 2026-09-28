@@ -23,6 +23,14 @@ DESCRIPTION
        Github url
            https://github.com/user/repo/pull/1
 
+       A source in a repository named oxcaml is built with an oxcaml-compiler
+       recipe from oxcaml/opam-repository: among the recipes installing the
+       source's VERSION and bootstrapping the build tools its oxcaml-dev.opam
+       requires, the one whose release commit is nearest in history. The
+       switch description records the recipe and the opam-repository commit.
+       Set GITHUB_TOKEN to avoid GitHub's rate limit on unauthenticated API
+       calls.
+
 ARGUMENTS
        SOURCE (required)
            Where to fetch the compiler.
