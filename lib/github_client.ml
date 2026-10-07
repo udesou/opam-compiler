@@ -172,7 +172,10 @@ module Dry_run = struct
         Ok
           {|opam-version: "2.0"
 depends: [ "ocaml-variants" {= "5.4.0+ox" & post} ]
-build: [ ["sh" "./write-config.sh" name "-v" "commit:string" "sha-of-recipe"] ]
+build: [
+  ["sh" "-exc" "./configure '--prefix=%{prefix}%'"]
+  ["sh" "./write-config.sh" name "-v" "commit:string" "sha-of-recipe"]
+]
 |}
 end
 

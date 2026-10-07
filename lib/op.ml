@@ -32,13 +32,15 @@ let recipe_file switch_name =
 
 let create_oxcaml runner github_client source switch_name ~configure_command =
   let open Let_syntax.Result in
-  let* () =
-    match configure_command with
-    | None -> Ok ()
+  let* configure_args =
+    match Option.map Bos.Cmd.to_list configure_command with
+    | None -> Ok []
+    | Some ("./configure" :: args) -> Ok args
     | Some _ ->
         Rresult.R.error_msg
-          "--configure-command and --with are not supported for OxCaml \
-           sources: the build recipe comes from oxcaml/opam-repository."
+          "for OxCaml sources, --configure-command must start with \
+           ./configure: its arguments are added to the configure of the \
+           oxcaml-compiler recipe."
   in
   let* branch =
     Source.target_branch source github_client
@@ -47,7 +49,8 @@ let create_oxcaml runner github_client source switch_name ~configure_command =
   let* plan = Oxcaml.plan github_client branch in
   let url = Branch.git_url branch in
   let file = recipe_file switch_name in
-  let* () = Bos.OS.File.write file (Oxcaml.pinned_opam plan ~url) in
+  let* recipe = Oxcaml.pinned_opam ~configure_args plan ~url in
+  let* () = Bos.OS.File.write file recipe in
   let description =
     Source.switch_description source github_client
     ^ " " ^ Oxcaml.description plan

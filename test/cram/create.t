@@ -66,10 +66,20 @@ borrowed from oxcaml/opam-repository:
   Run: OPAMEDITOR=cp './opam-compiler-oxcaml-oxcaml-main.opam' OPAMCLI=2.0 opam pin add --switch oxcaml-oxcaml-main --yes oxcaml-compiler.DRY-RUN git+https://github.com/oxcaml/oxcaml#main --edit
   Run: OPAMCLI=2.0 opam switch set-base --switch oxcaml-oxcaml-main oxcaml-compiler
 
-OxCaml recipes have their own configure step, so it cannot be replaced:
+For OxCaml, the arguments of --configure-command or --with are added to the
+recipe's own configure, so they can override its flags:
 
-  $ opam-compiler create --dry-run oxcaml:main --with afl
+  $ TMPDIR=. opam-compiler create --dry-run oxcaml:main --with afl
+  Run: OPAMCLI=2.0 opam switch create oxcaml-oxcaml-main --empty --description "[opam-compiler] oxcaml/oxcaml:main at 0401b35d00b0, built with oxcaml-compiler.DRY-RUN from oxcaml/opam-repository@a56316deae95" --repositories=oxcaml-a56316deae95=git+https://github.com/oxcaml/opam-repository.git#a56316deae95dcf4260cdf7df975002aa56316de,default
+  Run: OPAMEDITOR=cp './opam-compiler-oxcaml-oxcaml-main.opam' OPAMCLI=2.0 opam pin add --switch oxcaml-oxcaml-main --yes oxcaml-compiler.DRY-RUN git+https://github.com/oxcaml/oxcaml#main --edit
+  Run: OPAMCLI=2.0 opam switch set-base --switch oxcaml-oxcaml-main oxcaml-compiler
+  $ grep -- --prefix opam-compiler-oxcaml-oxcaml-main.opam
+    ["sh" "-exc" "./configure '--prefix=%{prefix}%' '--with-afl'"]
+
+The command itself is the recipe's, so it must be ./configure:
+
+  $ opam-compiler create --dry-run oxcaml:main --configure-command "make -j4"
   opam-compiler: internal error, uncaught exception:
-                 Failure("--configure-command and --with are not supported for OxCaml sources: the build recipe comes from oxcaml/opam-repository.")
+                 Failure("for OxCaml sources, --configure-command must start with ./configure: its arguments are added to the configure of the oxcaml-compiler recipe.")
                  
   [125]

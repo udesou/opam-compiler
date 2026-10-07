@@ -75,6 +75,7 @@ OxCaml has no compiler opam file in its source tree, so the build recipe comes
 from [oxcaml/opam-repository](https://github.com/oxcaml/opam-repository): the
 `oxcaml-compiler` release nearest in history to the source among those that can
 build it. The switch description records which one was used.
-`--configure-command` and `--with` are not supported. Set `GITHUB_TOKEN` to
+The arguments of `--configure-command` and `--with` are added to the recipe's
+configure, so they can override its flags. Set `GITHUB_TOKEN` to
 avoid GitHub's API rate limit (since creating an OxCaml switch requires
 additional API calls to find the recipe).

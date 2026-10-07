@@ -269,13 +269,49 @@ let description plan =
   Printf.sprintf "at %s, built with %s from oxcaml/opam-repository@%s"
     (short plan.source_commit) (package_version plan) (short plan.repo_commit)
 
+(* The compiler's own configure is a shell string run by "sh -exc"; the
+   bootstrap compiler's configure does not install to %{prefix}%. *)
+let is_compiler_configure s =
+  Astring.String.is_infix ~affix:"./configure" s
+  && Astring.String.is_infix ~affix:"--prefix=%{prefix}%" s
+
+(* Appended, so they override the recipe's own flags. *)
+let with_configure_args args opam =
+  let found = ref false in
+  let append = function
+    | [
+        ((OpamTypes.CString "sh", _) as sh);
+        ((OpamTypes.CString "-exc", _) as exc);
+        (OpamTypes.CString s, filter);
+      ]
+      when is_compiler_configure s ->
+        found := true;
+        let s = String.concat " " (s :: List.map Filename.quote args) in
+        [ sh; exc; (OpamTypes.CString s, filter) ]
+    | cmd -> cmd
+  in
+  let build =
+    List.map (fun (cmd, f) -> (append cmd, f)) (OpamFile.OPAM.build opam)
+  in
+  if !found then Ok (OpamFile.OPAM.with_build build opam)
+  else
+    Rresult.R.error_msg
+      "the oxcaml-compiler recipe has no configure step to add the configure \
+       arguments to"
+
 (* Repository recipes take their name and version from their directory; a
    pinned definition has to carry them. *)
-let pinned_opam plan ~url =
-  plan.recipe.opam
-  |> OpamFile.OPAM.with_name (OpamPackage.Name.of_string package)
-  |> OpamFile.OPAM.with_version
-       (OpamPackage.Version.of_string plan.recipe.version)
-  |> with_stamped_commit plan.source_commit
-  |> OpamFile.OPAM.with_url (OpamFile.URL.create (OpamUrl.parse url))
-  |> OpamFile.OPAM.write_to_string
+let pinned_opam ?(configure_args = []) plan ~url =
+  let opam =
+    plan.recipe.opam
+    |> OpamFile.OPAM.with_name (OpamPackage.Name.of_string package)
+    |> OpamFile.OPAM.with_version
+         (OpamPackage.Version.of_string plan.recipe.version)
+    |> with_stamped_commit plan.source_commit
+    |> OpamFile.OPAM.with_url (OpamFile.URL.create (OpamUrl.parse url))
+  in
+  let opam =
+    if configure_args = [] then Ok opam
+    else with_configure_args configure_args opam
+  in
+  Result.map OpamFile.OPAM.write_to_string opam

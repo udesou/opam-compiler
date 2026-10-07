@@ -16,5 +16,11 @@ val package_version : plan -> string
 val repository : plan -> string * string
 val description : plan -> string
 
-val pinned_opam : plan -> url:string -> string
-(** The recipe, fetching [url] and recording the source commit it builds. *)
+val pinned_opam :
+  ?configure_args:string list ->
+  plan ->
+  url:string ->
+  (string, [> Rresult.R.msg ]) result
+(** The recipe, fetching [url] and recording the source commit it builds.
+    [configure_args] are appended to the compiler's configure, so they can
+    override the recipe's flags. *)

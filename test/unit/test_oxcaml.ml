@@ -5,6 +5,8 @@ let recipe ~variants ~commit ~dune =
     {|opam-version: "2.0"
 depends: [ "ocaml-variants" {= "%s" & post} "oxcaml" {post} ]
 build: [
+  ["sh" "-exc" "cd ocaml-5.4.0 && ./configure --prefix %%{build}%%/init_deps"]
+  ["sh" "-exc" "./configure --enable-runtime5 '--prefix=%%{prefix}%%'"]
   ["sh" "-exc" "make"]
   ["sh" "./write-config.sh" name "-v" "commit:string" "%s"]
 ]
@@ -133,7 +135,8 @@ let pinned_tests =
         let opam =
           OpamFile.OPAM.read_from_string
             (Oxcaml.pinned_opam plan
-               ~url:"git+https://github.com/oxcaml/oxcaml#main")
+               ~url:"git+https://github.com/oxcaml/oxcaml#main"
+            |> Rresult.R.failwith_error_msg)
         in
         let check what = Alcotest.(check string) what in
         check "name" "oxcaml-compiler"
@@ -155,4 +158,62 @@ let pinned_tests =
            name ^ "=" ^ url) );
   ]
 
-let tests = [ ("Oxcaml plan", plan_tests); ("Oxcaml pinned", pinned_tests) ]
+let shell_commands opam =
+  List.filter_map
+    (fun (args, _) ->
+      match args with
+      | [
+       (OpamTypes.CString "sh", _);
+       (OpamTypes.CString "-exc", _);
+       (OpamTypes.CString s, _);
+      ] ->
+          Some s
+      | _ -> None)
+    (OpamFile.OPAM.build opam)
+
+let configure_tests =
+  let plan () =
+    Oxcaml.plan (client ~distances:[ ("C7", (0, 0)) ] ()) source
+    |> Rresult.R.failwith_error_msg
+  in
+  let pinned ?configure_args plan =
+    Oxcaml.pinned_opam ?configure_args plan ~url:"git+https://example.com/x"
+    |> Result.map OpamFile.OPAM.read_from_string
+  in
+  [
+    ( "configure args are appended to the compiler's configure",
+      `Quick,
+      fun () ->
+        let opam =
+          pinned
+            ~configure_args:[ "--enable-frame-pointers"; "CC=gcc -O2" ]
+            (plan ())
+          |> Rresult.R.failwith_error_msg
+        in
+        Alcotest.(check (list string))
+          __LOC__
+          [
+            "cd ocaml-5.4.0 && ./configure --prefix %{build}%/init_deps";
+            "./configure --enable-runtime5 '--prefix=%{prefix}%' \
+             '--enable-frame-pointers' 'CC=gcc -O2'";
+            "make";
+          ]
+          (shell_commands opam) );
+    ( "no configure args leaves the recipe alone",
+      `Quick,
+      fun () ->
+        let opam = pinned (plan ()) |> Rresult.R.failwith_error_msg in
+        Alcotest.(check int)
+          __LOC__ 0
+          (List.length
+             (List.filter
+                (fun s -> Astring.String.is_infix ~affix:"frame" s)
+                (shell_commands opam))) );
+  ]
+
+let tests =
+  [
+    ("Oxcaml plan", plan_tests);
+    ("Oxcaml pinned", pinned_tests);
+    ("Oxcaml configure", configure_tests);
+  ]
