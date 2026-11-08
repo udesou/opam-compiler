@@ -66,7 +66,9 @@ let parse_as_branch s =
   let open Let_syntax.Option in
   let+ g = Re.exec_opt re_branch s in
   let user = Re.Group.get g 1 in
-  let repo = re_group_get_opt g 2 |> Option.value ~default:"ocaml" in
+  let repo =
+    re_group_get_opt g 2 |> Option.value ~default:(default_repo_for_user user)
+  in
   let branch = Re.Group.get g 3 in
   Github_branch { user; repo; branch }
 

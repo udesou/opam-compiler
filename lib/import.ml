@@ -1,6 +1,8 @@
 let re_group_get_opt group num =
   match Re.Group.get group num with s -> Some s | exception Not_found -> None
 
+let default_repo_for_user = function "oxcaml" -> "oxcaml" | _ -> "ocaml"
+
 module Let_syntax = struct
   module Cmdliner = struct
     open Cmdliner.Term

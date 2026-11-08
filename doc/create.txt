@@ -11,13 +11,14 @@ DESCRIPTION
            user/repo:branch
 
        Github branch (short form)
-           user:branch (repo defaults to "ocaml")
+           user:branch (repo defaults to "ocaml"; "oxcaml" for oxcaml)
 
        Github pull request
            user/repo#number
 
        Github pull request (short form)
-           #number (repo defaults to "ocaml/ocaml")
+           #number or user#number (defaults to "ocaml/ocaml"; "oxcaml" for
+           oxcaml)
 
        Github url
            https://github.com/user/repo/pull/1
