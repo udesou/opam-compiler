@@ -23,6 +23,12 @@ DESCRIPTION
        Github url
            https://github.com/user/repo/pull/1
 
+       A source in a repository named oxcaml needs an oxcaml-dev.opam. It is
+       built with the compiler, dune and menhir that file requires, installed
+       in a switch of their own and shared by sources requiring the same
+       ones. Set GITHUB_TOKEN to avoid GitHub's rate limit on unauthenticated
+       API calls.
+
 ARGUMENTS
        SOURCE (required)
            Where to fetch the compiler.

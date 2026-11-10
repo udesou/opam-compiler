@@ -133,6 +133,12 @@ module Create = struct
           "#number or user#number (defaults to \"ocaml/ocaml\"; \"oxcaml\" for \
            oxcaml)" );
       `I ("Github url", "https://github.com/user/repo/pull/1");
+      `P
+        "A source in a repository named $(b,oxcaml) needs an oxcaml-dev.opam. \
+         It is built with the compiler, dune and menhir that file requires, \
+         installed in a switch of their own and shared by sources requiring \
+         the same ones. Set $(b,GITHUB_TOKEN) to avoid GitHub's rate limit on \
+         unauthenticated API calls.";
     ]
 
   let term =

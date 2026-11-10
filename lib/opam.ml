@@ -23,16 +23,17 @@ let run_out_opam runner args =
 
 let ocaml_variants = A "ocaml-variants"
 
-let create runner name ~description =
+let create ?(no_switch = false) runner name ~description =
   run_opam runner
-    [
-      A "switch";
-      A "create";
-      A (Switch_name.to_string name);
-      A "--empty";
-      A "--description";
-      A description;
-    ]
+    ([
+       A "switch";
+       A "create";
+       A (Switch_name.to_string name);
+       A "--empty";
+       A "--description";
+       A description;
+     ]
+    @ if no_switch then [ A "--no-switch" ] else [])
 
 let switch name = L [ A "--switch"; A (Switch_name.to_string name) ]
 
@@ -57,6 +58,39 @@ let pin_add runner name url ~configure_command =
   in
   let cmd = cmd_base @ cmd_rest in
   run_opam runner cmd
+
+let pin_add_opam_file runner name url ~package ~opam_file =
+  run_opam runner
+    [
+      A "pin";
+      A "add";
+      switch name;
+      A "--yes";
+      A package;
+      A url;
+      A "--edit";
+      Set_env ("OPAMEDITOR", "cp " ^ Filename.quote (Fpath.to_string opam_file));
+    ]
+
+let install_deps runner name opam_file =
+  run_opam runner
+    [
+      A "install";
+      switch name;
+      A "--yes";
+      A "--deps-only";
+      A (Fpath.to_string opam_file);
+    ]
+
+let switch_exists runner name =
+  let open Let_syntax.Result in
+  let+ out = run_out_opam runner [ A "switch"; A "list"; A "--short" ] in
+  List.mem (Switch_name.to_string name) (String.split_on_char '\n' out)
+
+let prefix runner name =
+  let open Let_syntax.Result in
+  let+ out = run_out_opam runner [ A "var"; A "prefix"; switch name ] in
+  String.trim out
 
 let set_base runner name =
   run_opam runner [ A "switch"; A "set-base"; switch name; ocaml_variants ]

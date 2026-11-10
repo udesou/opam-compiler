@@ -1,5 +1,6 @@
 ## Unreleased
 - Support Github URLs as sources (#32, @emillon)
+- Support OxCaml sources (#42, @udesou)
 
 ## 0.2.0 (2024-01-19)
 

@@ -114,12 +114,20 @@ let switch_description source client =
     pp_extra_description
     (extra_description source client)
 
-let switch_target source github_client =
+let target_branch source github_client =
   match source with
-  | Github_branch branch -> Ok (Branch.git_url branch)
+  | Github_branch branch -> Ok branch
   | Github_PR pr ->
       let open Let_syntax.Result in
       let+ { source_branch; _ } = Github_client.pr_info github_client pr in
-      Branch.git_url source_branch
+      source_branch
+
+let switch_target source github_client =
+  Result.map Branch.git_url (target_branch source github_client)
+
+let is_oxcaml = function
+  | Github_branch { repo = "oxcaml"; _ } | Github_PR { repo = "oxcaml"; _ } ->
+      true
+  | _ -> false
 
 let equal (x : t) y = x = y

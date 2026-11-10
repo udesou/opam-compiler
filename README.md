@@ -57,3 +57,32 @@ which will create a vanilla compiler. It is possible to override this:
 
     # Build the native compiler with flambda and frame pointers
     opam compiler create '#1234' --configure-command "./configure --enable-flambda --enable-frame-pointers"
+
+OxCaml
+------
+
+Sources from a repository named `oxcaml` are built as OxCaml:
+
+    # Use this branch of oxcaml/oxcaml
+    opam compiler create 'oxcaml:main'
+
+    # Use this pull request on oxcaml/oxcaml
+    opam compiler create 'oxcaml#1234'
+
+OxCaml is built with the dune and menhir its `oxcaml-dev.opam` requires. These
+are installed in a separate switch, `oxcaml-build-<hash>`, which is shared by
+sources requiring the same versions and can be removed once the compiler is
+built. Sources without an `oxcaml-dev.opam` are not supported.
+
+Unlike other switches, the new switch only contains the compiler: OxCaml main
+is not compatible with released packages, so many of them will not install.
+
+No configure flags are added beyond what the build needs, and a plain OxCaml
+build is single-domain. To support multiple domains (and other configure
+flags), you may write, for instance:
+
+    # Build OxCaml with support for multiple domains
+    opam compiler create 'oxcaml:main' --configure-command "./configure --enable-multidomain --enable-poll-insertion"
+
+opam-compiler resolves sources through GitHub's API. Set `GITHUB_TOKEN` to
+avoid its rate limit on unauthenticated calls.

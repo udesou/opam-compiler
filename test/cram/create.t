@@ -57,3 +57,25 @@ It is not possible to mix --configure-command and --with:
   $ opam-compiler create --dry-run USER/REPO:BRANCH --configure-command "./configure --enable-x" --with afl
   opam-compiler: --configure-command and --with cannot be passed together.
   [124]
+
+A source in a repository named oxcaml is built in a switch holding the tools
+its oxcaml-dev.opam requires, and pinned as ocaml-variants:
+
+  $ TMPDIR=. opam-compiler create --dry-run oxcaml:main --with afl
+  Run_out: OPAMCLI=2.0 opam switch list --short
+  Run: OPAMCLI=2.0 opam switch create oxcaml-build-c8c9bc9f0779 --empty --description "[opam-compiler] tools to build OxCaml" --no-switch
+  Run: OPAMCLI=2.0 opam install --switch oxcaml-build-c8c9bc9f0779 --yes --deps-only ./opam-compiler-oxcaml-build-c8c9bc9f0779/oxcaml-build-c8c9bc9f0779.opam
+  Run_out: OPAMCLI=2.0 opam var prefix --switch oxcaml-build-c8c9bc9f0779
+  Run: OPAMCLI=2.0 opam switch create oxcaml-oxcaml-main --empty --description "[opam-compiler] oxcaml/oxcaml:main at 0401b35d00b0, built in oxcaml-build-c8c9bc9f0779"
+  Run: OPAMEDITOR=cp './opam-compiler-oxcaml-oxcaml-main/oxcaml-oxcaml-main.opam' OPAMCLI=2.0 opam pin add --switch oxcaml-oxcaml-main --yes ocaml-variants.5.4.0+ox git+https://github.com/oxcaml/oxcaml#0401b35d00b0580d99d6ee87e6be67a40401b35d --edit
+  Run: OPAMCLI=2.0 opam switch set-base --switch oxcaml-oxcaml-main ocaml-variants
+  $ grep -- --prefix opam-compiler-oxcaml-oxcaml-main/oxcaml-oxcaml-main.opam
+    ["./configure" "--prefix=%{prefix}%" "--docdir=%{doc}%/ocaml" "--with-dune=output/bin/dune" "--disable-warn-error" "--with-afl"]
+
+The configure command is the generated one, so it must be ./configure:
+
+  $ opam-compiler create --dry-run oxcaml:main --configure-command "make -j4"
+  opam-compiler: internal error, uncaught exception:
+                 Failure("For OxCaml sources, --configure-command must start with ./configure")
+                 
+  [125]

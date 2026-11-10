@@ -16,7 +16,7 @@ let cache_tests =
         let pr_info, check =
           Mock.create (module Pull_request) __LOC__ expectations
         in
-        let mock_client = { Github_client.pr_info } in
+        let mock_client = { Helpers.github_client_fail_all with pr_info } in
         let client = make_client mock_client in
         for _ = 1 to 3 do
           let _ = Github_client.pr_info client pr in
